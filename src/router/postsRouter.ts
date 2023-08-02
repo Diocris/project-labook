@@ -1,12 +1,15 @@
-// import express from "express"
+import express from "express"
+import { PostsController } from "../controllers/PostsController"
+import { PostsBusiness } from "../business/PostsBusiness"
+import { PostsDatabase } from "../database/PostsDatabase"
+import { IdGenerator } from "../services/idGenerator"
+import { TokenManager } from "../services/TokenManager"
 
-// export const userRouter = express.Router()
 
-// import { PostsController } from "../controllers/UserController"
+export const postsRouter = express.Router()
 
-// const userControllerr = new PostsController()
 
-// userRouter.get("/", userControllerr.getUsers)
-// userRouter.post("/", userControllerr.createUser)
-// userRouter.put("/:id")
-// userRouter.delete("/:id")
+const postsController = new PostsController(new PostsBusiness(new PostsDatabase(), new IdGenerator(), new TokenManager()))
+
+postsRouter.get("/", postsController.getPosts)
+postsRouter.post("/", postsController.createPost)

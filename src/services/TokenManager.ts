@@ -14,6 +14,10 @@ export interface TokenPayLoad {
     role: USER_ROLES
 }
 
+export interface TokenPostPayLoad {
+    authorization: string
+}
+
 export class TokenManager {
     public createToken = (payload: TokenPayLoad): string => {
         const token = jwt.sign(payload, process.env.JWT_KEY as string, {

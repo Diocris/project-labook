@@ -14,7 +14,6 @@ export interface UserDB {
     created_at: string
 }
 
-// é o modelo de User que o front receberá (sem password e createdAt camelCase)
 export interface UserModel {
     id: string,
     name: string,

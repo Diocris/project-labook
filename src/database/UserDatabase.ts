@@ -18,6 +18,11 @@ export class UserDatabase extends BaseDatabase {
 
     }
 
+    public async getUserByEmail(email: string): Promise<UsersDB> {
+        const [result] = await BaseDatabase.connection(UserDatabase.USERS_TABLE).where({ email: email })
+        return result
+    }
+
     public async postUser(userDB: UsersDB): Promise<void> {
         await BaseDatabase.connection(UserDatabase.USERS_TABLE).insert(userDB)
     }
@@ -26,8 +31,8 @@ export class UserDatabase extends BaseDatabase {
         await BaseDatabase.connection(UserDatabase.USERS_TABLE).update(userDB).where({ id: idToEdit })
     }
 
-    public async deleteUser(id: string): Promise<void> {
-        await BaseDatabase.connection(UserDatabase.USERS_TABLE).del().where({ id })
+    public async deleteUser(email: string): Promise<void> {
+        await BaseDatabase.connection(UserDatabase.USERS_TABLE).del().where({ email: email })
     }
 
 
