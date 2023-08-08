@@ -57,14 +57,11 @@ export class UserBusiness {
 
         const hashedPassword = await this.hashManager.hash(password)
 
-        const userDatabase = new UserDatabase()
-
-        const userDBExist = await userDatabase.getUserByEmail(email)
+        const userDBExist = await this.userDatabase.getUserByEmail(email)
 
         if (userDBExist) {
             throw new Error("User already registered, try another one.")
         }
-
 
 
         const newUser = new User(id, name, email, hashedPassword, USER_ROLES.NORMAL, new Date().toISOString())
@@ -77,7 +74,7 @@ export class UserBusiness {
             role: newUser.getRole(),
             created_at: newUser.getCreatedAt()
         }
-        await userDatabase.postUser(newUserDB)
+        await this.userDatabase.postUser(newUserDB)
 
         const tokenPayLoad: TokenPayLoad = {
             id: newUser.getId(),
@@ -109,9 +106,11 @@ export class UserBusiness {
         if (!userDB) {
             throw new NotFoundError("Email not found.")
         }
+
         const hashedPassword = userDB.password
 
-        const isPasswordCorrect = await this.hashManager.compare(password, hashedPassword)
+        const isPasswordCorrect = this.hashManager.compare(password, hashedPassword)
+
 
         if (!isPasswordCorrect) {
             throw new BadRequest("Incorrect email or password.")

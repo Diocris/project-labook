@@ -6,6 +6,7 @@ import { LoginSchema } from "../dtos/login.dto"
 import { UserDatabase } from "../database/UserDatabase"
 import { NotFoundError } from "../errors/NotFoundError"
 import { DeleteSchema } from "../dtos/deleteUser.dto"
+import { ZodError } from "zod"
 
 
 
@@ -26,6 +27,9 @@ export class UserController {
             res.status(200).send(output)
 
         } catch (error: any) {
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
+            }
             if (res.statusCode === 20) {
                 res.status(500)
             }
@@ -54,7 +58,10 @@ export class UserController {
 
 
         } catch (error: any) {
-            if (res.statusCode === 200) {
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
+            }
+            if (res.statusCode === 20) {
                 res.status(500)
             }
             if (error instanceof Error) {
@@ -76,7 +83,10 @@ export class UserController {
             const output = await this.userBusiness.login(input)
             res.status(200).send(output)
         } catch (error: any) {
-            if (res.statusCode === 200) {
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
+            }
+            if (res.statusCode === 20) {
                 res.status(500)
             }
             if (error instanceof Error) {
@@ -101,8 +111,10 @@ export class UserController {
 
 
         } catch (error: any) {
-
-            if (res.statusCode === 200) {
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
+            }
+            if (res.statusCode === 20) {
                 res.status(500)
             }
             if (error instanceof Error) {
