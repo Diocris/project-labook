@@ -1,6 +1,39 @@
+import { UsersDB } from "../types/types";
 import { BaseDatabase } from "./BaseDatabase";
 
-export class UserDatabase {
+export class UserDatabase extends BaseDatabase {
     public static USERS_TABLE = "users"
+
+
+    public async getUsers(id?: string): Promise<UsersDB[]> {
+
+        let result: UsersDB[]
+        if (id) {
+            result = await BaseDatabase.connection(UserDatabase.USERS_TABLE).where({ id: id })
+        } else {
+            result = await BaseDatabase.connection(UserDatabase.USERS_TABLE)
+        }
+
+        return result
+
+    }
+
+    public async getUserByEmail(email: string): Promise<UsersDB> {
+        const [result] = await BaseDatabase.connection(UserDatabase.USERS_TABLE).where({ email: email })
+        return result
+    }
+
+    public async postUser(userDB: UsersDB): Promise<void> {
+        await BaseDatabase.connection(UserDatabase.USERS_TABLE).insert(userDB)
+    }
+
+    public async editUser(idToEdit: string, userDB: UsersDB): Promise<void> {
+        await BaseDatabase.connection(UserDatabase.USERS_TABLE).update(userDB).where({ id: idToEdit })
+    }
+
+    public async deleteUser(email: string): Promise<void> {
+        await BaseDatabase.connection(UserDatabase.USERS_TABLE).del().where({ email: email })
+    }
+
 
 }

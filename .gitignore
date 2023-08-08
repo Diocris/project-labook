@@ -131,6 +131,7 @@ dist
 
 # Ignore database files
 *.db
+*.sql
 
 # Ignore temporary files or caches
 *.tmp

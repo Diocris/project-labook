@@ -1,35 +1,27 @@
-export interface Users {
+import { USER_ROLES } from "../models/User"
+
+export interface UsersDB {
     id: string,
     name: string,
     email: string,
     password: string,
-    role: string,
-    createdAt: string
+    role: USER_ROLES,
+    created_at: string
 }
 
-export interface Posts {
+export interface PostsDB {
     id: string,
-    creatorId: string,
+    creator_id: string,
     content: string,
     likes: number,
     dislikes: number,
-    createdAt: string,
-    updatedAt: string
+    created_at: string,
+    updated_at: string
 }
 
-export interface Likes {
+export interface LikesDB {
     userId: string,
     postId: string,
     like: number
 }
 
-export enum USER_ROLES {
-    NORMAL = "NORMAL",
-    ADMIN = "ADMIN"
-}
-
-export interface TokenPayLoad {
-    id: string,
-    name: string,
-    role: USER_ROLES
-}
