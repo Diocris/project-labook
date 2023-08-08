@@ -125,7 +125,7 @@ export class PostsController {
                 like: req.body.like
             }
 
-            const output = await this.postsBusiness.likePost
+            const output = await this.postsBusiness.likePost(input)
 
 
             return output
