@@ -1,38 +1,39 @@
-import { randomUUID } from "crypto";
 import { PostsBusiness } from "../business/PostsBusiness";
-import { PostsDatabase } from "../database/PostsDatabase";
-import { TokenManager } from "../services/TokenManager";
-import { IdGenerator } from "../services/idGenerator";
 import { Request, Response } from "express";
-import { CreatePostOutputDTO, CreatePostSchema } from "../dtos/createPost.dto";
-import { UserDatabase } from "../database/UserDatabase";
-import { GetPostsInputDTO, getPostsSchema } from "../dtos/getPosts.dto";
+import { CreatePostSchema } from "../dtos/createPost.dto";
+import { GetPostOutputDTO, GetPostsInputDTO, getPostsSchema } from "../dtos/getPosts.dto";
 import { EditPostSchema, editPostInputDTO } from "../dtos/editPost.dto";
 import { DeletePostInputDTO, DeletePostOutputDTO, DeletePostSchema } from "../dtos/deletePost.dto";
+import { LikeDislikeInputDTO, LikeDislikeSchema } from "../dtos/likeDislikePost.dto";
+import { ZodError } from "zod";
+import { BaseError } from "../errors/BaseErrors";
+
 
 export class PostsController {
     constructor(private postsBusiness: PostsBusiness) {
 
     }
 
-
+    //
+    //Get Posts
+    //
     public getPosts = async (req: Request, res: Response) => {
 
         try {
 
             const input: GetPostsInputDTO = getPostsSchema.parse({ auth: req.headers.authorization })
-            const output = await this.postsBusiness.getPosts(input)
+            const output: GetPostOutputDTO[] = await this.postsBusiness.getPosts(input)
 
 
             res.status(200).send(output)
 
 
         } catch (error: any) {
-            if (res.statusCode === 200) {
-                res.status(500)
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
             }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
@@ -41,7 +42,9 @@ export class PostsController {
 
     }
 
-
+    //
+    //Create Post
+    //
     public createPost = async (req: Request, res: Response) => {
         try {
             const auth = req.headers.authorization
@@ -57,17 +60,20 @@ export class PostsController {
             res.status(200).send(output)
 
         } catch (error: any) {
-            if (res.statusCode === 200) {
-                res.status(500)
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
             }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
         }
     }
 
+    //
+    //Edit Post
+    //
     public editPost = async (req: Request, res: Response) => {
         try {
             const input: editPostInputDTO = EditPostSchema.parse({
@@ -82,11 +88,11 @@ export class PostsController {
             res.status(200).send(output)
 
         } catch (error: any) {
-            if (res.statusCode === 200) {
-                res.status(500)
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
             }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
@@ -105,41 +111,44 @@ export class PostsController {
             res.status(200).send(output.message)
 
         } catch (error: any) {
-            if (res.statusCode === 200) {
-                res.status(500)
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
             }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
         }
     }
 
-
+    //
+    //Like Post
+    //
     public likePost = async (req: Request, res: Response) => {
         try {
-            const input = {
+            const input: LikeDislikeInputDTO = LikeDislikeSchema.parse({
                 token: req.headers.authorization,
                 postId: req.params.id,
                 like: req.body.like
-            }
+            })
 
             const output = await this.postsBusiness.likePost(input)
 
 
-            return output
+            res.status(200).send(output)
 
         } catch (error: any) {
-            if (res.statusCode === 200) {
-                res.status(500)
+            if (error instanceof ZodError) {
+                res.status(400).send(error.issues)
             }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
         }
     }
+
 }
 
