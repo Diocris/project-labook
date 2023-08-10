@@ -7,6 +7,7 @@ import { UserDatabase } from "../database/UserDatabase"
 import { NotFoundError } from "../errors/NotFoundError"
 import { DeleteSchema } from "../dtos/deleteUser.dto"
 import { ZodError } from "zod"
+import { BaseError } from "../errors/BaseErrors"
 
 
 
@@ -14,6 +15,10 @@ export class UserController {
     constructor(private userBusiness: UserBusiness) {
 
     }
+
+    //
+    //Get Users
+    //
     public getUsers = async (req: Request, res: Response) => {
         try {
             const input = GetUsersSchema.parse({
@@ -30,11 +35,8 @@ export class UserController {
             if (error instanceof ZodError) {
                 res.status(400).send(error.issues)
             }
-            if (res.statusCode === 20) {
-                res.status(500)
-            }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
@@ -42,6 +44,9 @@ export class UserController {
 
     }
 
+    //
+    //Create User
+    //
     public createUser = async (req: Request, res: Response) => {
         try {
             const input = SignupSchema.parse({
@@ -61,11 +66,8 @@ export class UserController {
             if (error instanceof ZodError) {
                 res.status(400).send(error.issues)
             }
-            if (res.statusCode === 20) {
-                res.status(500)
-            }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
@@ -86,11 +88,8 @@ export class UserController {
             if (error instanceof ZodError) {
                 res.status(400).send(error.issues)
             }
-            if (res.statusCode === 20) {
-                res.status(500)
-            }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }
@@ -98,7 +97,9 @@ export class UserController {
 
     }
 
-
+    //
+    //Delete User
+    //
     public deleteID = async (req: Request, res: Response): Promise<void> => {
         try {
             const input = DeleteSchema.parse({
@@ -114,11 +115,8 @@ export class UserController {
             if (error instanceof ZodError) {
                 res.status(400).send(error.issues)
             }
-            if (res.statusCode === 20) {
-                res.status(500)
-            }
-            if (error instanceof Error) {
-                res.send(error.message)
+            if (error instanceof BaseError) {
+                res.status(error.statusCode).send(error.message)
             } else {
                 res.send("Unexpected error.")
             }

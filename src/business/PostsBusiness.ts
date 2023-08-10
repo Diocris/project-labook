@@ -1,5 +1,3 @@
-
-import { CONSTRAINT } from "sqlite3";
 import { PostsDatabase } from "../database/PostsDatabase";
 import { UserDatabase } from "../database/UserDatabase";
 import { CreatePostInputDTO, CreatePostOutputDTO } from "../dtos/createPost.dto";
@@ -12,11 +10,16 @@ import { Posts } from "../models/Posts";
 import { TokenPayload, USER_ROLES } from "../models/User";
 import { TokenManager, TokenPayLoad } from "../services/TokenManager";
 import { IdGenerator } from "../services/idGenerator";
-import { PostsDB } from "../types/types";
+import { LikesDB, PostsDB, UsersDB } from "../types/types";
+import { LikesDatabase } from "../database/LikesDabatase";
+import { LikeDislikeInputDTO, LikeDislikeOutputDTO } from "../dtos/likeDislikePost.dto";
 
 export class PostsBusiness {
-    constructor(private postsDatabase: PostsDatabase, private idGenerator: IdGenerator, private tokenManager: TokenManager, private userDatabase: UserDatabase) { }
+    constructor(private postsDatabase: PostsDatabase, private idGenerator: IdGenerator, private tokenManager: TokenManager, private userDatabase: UserDatabase, private likesDatabase: LikesDatabase) { }
 
+    //
+    //Get Posts
+    //
     public getPosts = async (input: GetPostsInputDTO): Promise<GetPostOutputDTO[]> => {
 
         const { auth, id } = input
@@ -25,19 +28,24 @@ export class PostsBusiness {
             throw new BadRequest("Authorization required.")
         }
 
-        const postsDatabase = await this.postsDatabase.getPosts(id)
+        const postsDatabase: PostsDB[] = await this.postsDatabase.getPosts(id)
 
         const output = []
 
         for (const post of postsDatabase) {
+            const [postLikes] = await this.likesDatabase.countLike(post.id)
+            const likes = Number(postLikes['count(*)'])
+
+            const [postDislikes] = await this.likesDatabase.countDislike(post.id)
+            const dislikes = Number(postDislikes['count(*)'])
 
             const [user] = await this.userDatabase.getUsers(post.creator_id)
 
             const postDB: GetPostOutputDTO = {
                 id: post.id,
                 content: post.content,
-                likes: post.likes,
-                dislikes: post.dislikes,
+                likes: likes,
+                dislikes: dislikes,
                 createdAt: post.created_at,
                 uploadedAt: post.updated_at,
                 creator: {
@@ -50,18 +58,21 @@ export class PostsBusiness {
             output.push(postDB)
         }
 
-
         return output
+
     }
 
+    //
+    //Create Post
+    //
     public createPost = async (input: CreatePostInputDTO): Promise<CreatePostOutputDTO> => {
 
         const { content, creator } = input
 
 
-        const [user] = await this.userDatabase.getUsers(creator)
+        const [user]: UsersDB[] = await this.userDatabase.getUsers(creator)
 
-        const postId = this.idGenerator.generate()
+        const postId: string = this.idGenerator.generate()
 
 
         const newPost: PostsDB = {
@@ -89,19 +100,20 @@ export class PostsBusiness {
             }
         }
 
-
         return output
     }
 
-
+    //
+    //Edit Post
+    //
     public editPost = async (input: editPostInputDTO): Promise<editPostOutputDTO> => {
 
         const { token, postId, content } = input
 
-        const payLoad = this.tokenManager.getPayLoad(token)
-        console.log(payLoad?.id)
+        const payLoad: TokenPayLoad | null = this.tokenManager.getPayLoad(token)
 
-        const [user] = await this.userDatabase.getUsers(payLoad?.id)
+
+        const [user]: UsersDB[] = await this.userDatabase.getUsers(payLoad?.id)
 
         if (!user) {
             throw new NotFoundError("User not found.")
@@ -111,7 +123,7 @@ export class PostsBusiness {
             throw new BadRequest("Only the post creator can edit it.")
         }
 
-        const [post] = await this.postsDatabase.getPosts(postId)
+        const [post]: PostsDB[] = await this.postsDatabase.getPosts(postId)
 
         if (!post) {
             throw new NotFoundError("Post not found.")
@@ -141,6 +153,9 @@ export class PostsBusiness {
         return output
     }
 
+    //
+    //Delete Post
+    //
     public deletePost = async (input: DeletePostInputDTO): Promise<DeletePostOutputDTO> => {
         const { token, postId } = input
 
@@ -152,7 +167,7 @@ export class PostsBusiness {
 
         const [post]: PostsDB[] = await this.postsDatabase.getPosts(postId)
 
-        console.log(post.id)
+
 
         if (!post) {
             throw new NotFoundError("Post not found.")
@@ -172,31 +187,75 @@ export class PostsBusiness {
 
     }
 
-    public likePost = async (input: any) => {
+    //
+    //Like / Dislike Post
+    //
+    public likePost = async (input: LikeDislikeInputDTO): Promise<LikeDislikeOutputDTO> => {
         const { token, postId, like } = input
-
+        let output;
         let likeValue;
 
         if (like === true) {
             likeValue = 1
-        } else {
+        } else if (like === false) {
             likeValue = 0
         }
 
-        const user = this.tokenManager.getPayLoad(token)
+        const user: TokenPayLoad | null = this.tokenManager.getPayLoad(token)
 
-        const [userDB] = await this.userDatabase.getUsers(user?.id)
+        const [userDB]: UsersDB[] = await this.userDatabase.getUsers(user?.id)
 
-        const [post] = await this.postsDatabase.getPosts(postId)
+        const [post]: PostsDB[] = await this.postsDatabase.getPosts(postId)
 
-        const likePostDB = {
+        const inputDB = {
+            postId: postId,
+            creatorId: user?.id
+        }
+
+        const likePostDB: LikesDB = {
             user_id: userDB.id,
             post_id: post.id,
-            like: likeValue
+            like: Number(likeValue)
+        }
+
+        const [liked]: LikesDB[] = await this.likesDatabase.getLikes(inputDB)
+
+        if (liked) {
+            if (post.creator_id === userDB.id) {
+                throw new BadRequest("Creators can't like them own post.")
+            }
+
+            if (liked.like === 0 && likeValue === 0 || liked.like === 1 && likeValue === 1) {
+                await this.likesDatabase.deleteLike(liked.user_id)
+                output = "You removed your like/disliked."
+                return output
+            }
+
+            if (liked.like === 0) {
+                likeValue = 1
+                output = "You liked the post."
+            } else if (liked.like === 1) {
+                likeValue = 0
+                output = "You disliked the post."
+            }
+
+            await this.likesDatabase.editLike(likePostDB)
+            return output
         }
 
 
+        await this.likesDatabase.likeDislike(likePostDB)
 
+
+        if (likeValue === 1) {
+            output = "You liked the post."
+        } else if (likeValue === 0) {
+            output = "You disliked the post."
+        }
+
+        return output
     }
+
+
 }
 

@@ -20,8 +20,8 @@ export interface PostsDB {
 }
 
 export interface LikesDB {
-    userId: string,
-    postId: string,
+    user_id: string,
+    post_id: string,
     like: number
 }
 

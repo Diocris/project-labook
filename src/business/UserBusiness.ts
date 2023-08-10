@@ -16,6 +16,10 @@ export class UserBusiness {
     constructor(private userDatabase: UserDatabase, private IdGenerator: IdGenerator, private tokenManager: TokenManager, private hashManager: HashManager) {
 
     }
+
+    //
+    //Get Users
+    //
     public getUsers = async (input: GetUsersInputDTO): Promise<GetUsersOutputDTO> => {
         const { q, token } = input
 
@@ -29,7 +33,7 @@ export class UserBusiness {
             throw new BadRequest("Only Admins can use this function.")
         }
 
-        const usersDB = await this.userDatabase.getUsers(q)
+        const usersDB: UsersDB[] = await this.userDatabase.getUsers(q)
 
         const users = usersDB.map((userDB) => {
             const user = new User(
@@ -49,6 +53,9 @@ export class UserBusiness {
         return output
     }
 
+    //
+    //SignUp
+    //
     public signUp = async (input: SignupInputDTO): Promise<SignupOutputDTO> => {
         const { name, email, password } = input
 
@@ -74,7 +81,7 @@ export class UserBusiness {
             role: newUser.getRole(),
             created_at: newUser.getCreatedAt()
         }
-        await this.userDatabase.postUser(newUserDB)
+        await this.userDatabase.createUser(newUserDB)
 
         const tokenPayLoad: TokenPayLoad = {
             id: newUser.getId(),
@@ -95,19 +102,20 @@ export class UserBusiness {
 
     }
 
-
-
+    //
+    //Login
+    //
     public login = async (input: LoginInputDTO): Promise<LoginOutputDTO> => {
 
         const { email, password } = input
 
-        const userDB = await this.userDatabase.getUserByEmail(email)
+        const userDB: UsersDB = await this.userDatabase.getUserByEmail(email)
 
         if (!userDB) {
             throw new NotFoundError("Email not found.")
         }
 
-        const hashedPassword = userDB.password
+        const hashedPassword: string = userDB.password
 
         const isPasswordCorrect = this.hashManager.compare(password, hashedPassword)
 
@@ -116,7 +124,7 @@ export class UserBusiness {
             throw new BadRequest("Incorrect email or password.")
         }
 
-        const user = new User(
+        const user: User = new User(
             userDB.id,
             userDB.name,
             userDB.email,
@@ -131,7 +139,7 @@ export class UserBusiness {
             role: user.getRole()
         }
 
-        const token = this.tokenManager.createToken(payload)
+        const token: string = this.tokenManager.createToken(payload)
 
         const output: LoginOutputDTO = {
             message: "Login realizado com sucesso",
@@ -141,12 +149,14 @@ export class UserBusiness {
         return output
     }
 
-
+    //
+    //Delete User
+    //
     public deleteUser = async (input: DeleteInputDTO): Promise<DeleteOutputDTO> => {
 
         const { email } = input
 
-        const emailExists = await this.userDatabase.getUserByEmail(email)
+        const emailExists: UsersDB = await this.userDatabase.getUserByEmail(email)
 
 
         if (!emailExists) {
