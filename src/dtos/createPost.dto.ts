@@ -2,7 +2,7 @@ import z from "zod"
 
 export interface CreatePostInputDTO {
     content: string,
-    creator: string
+    token: string
 }
 
 export interface CreatePostOutputDTO {
@@ -33,5 +33,5 @@ export const CreatorSchema = z.object({
 
 export const CreatePostSchema = z.object({
     content: z.string({ required_error: "Write something to be posted.", invalid_type_error: "Try to use some letter." }).min(1),
-    creatorId: z.string({ required_error: "Creator id invalid." }).optional()
+    token: z.string({ required_error: "Creator id invalid." })
 }).transform(data => data as CreatePostInputDTO)

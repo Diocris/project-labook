@@ -67,17 +67,19 @@ export class PostsBusiness {
     //
     public createPost = async (input: CreatePostInputDTO): Promise<CreatePostOutputDTO> => {
 
-        const { content, creator } = input
+        const { content, token } = input
 
+        const userToken = this.tokenManager.getPayLoad(token)
 
-        const [user]: UsersDB[] = await this.userDatabase.getUsers(creator)
-
+        const [user]: UsersDB[] = await this.userDatabase.getUsers(userToken?.id)
+        if (!user) {
+            throw new NotFoundError("User not found, authorization must be wrong, check it again.")
+        }
         const postId: string = this.idGenerator.generate()
-
 
         const newPost: PostsDB = {
             id: postId,
-            creator_id: user.id,
+            creator_id: user?.id,
             content: content,
             likes: 0,
             dislikes: 0,
@@ -96,7 +98,7 @@ export class PostsBusiness {
             updatedAt: newPost.updated_at,
             creator: {
                 id: newPost.creator_id,
-                name: user.name,
+                name: user?.name,
             }
         }
 

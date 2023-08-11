@@ -10,7 +10,7 @@ export class UserDatabase extends BaseDatabase {
     public async getUsers(id?: string): Promise<UsersDB[]> {
 
         let result: UsersDB[]
-        if (id) {
+        if (id !== undefined) {
             result = await BaseDatabase.connection(UserDatabase.USERS_TABLE).where({ id: id })
         } else {
             result = await BaseDatabase.connection(UserDatabase.USERS_TABLE)
