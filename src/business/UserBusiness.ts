@@ -64,14 +64,16 @@ export class UserBusiness {
 
         const hashedPassword = await this.hashManager.hash(password)
 
-        const userDBExist = await this.userDatabase.getUserByEmail(email)
+        const userDBExist: UsersDB = await this.userDatabase.getUserByEmail(email)
+
+
 
         if (userDBExist) {
-            throw new Error("User already registered, try another one.")
+            throw new BadRequest("User already registered, try another one.")
         }
 
 
-        const newUser = new User(id, name, email, hashedPassword, USER_ROLES.NORMAL, new Date().toISOString())
+        const newUser: User = new User(id, name, email, hashedPassword, USER_ROLES.NORMAL, new Date().toISOString())
 
         const newUserDB: UsersDB = {
             id: newUser.getId(),
@@ -91,10 +93,8 @@ export class UserBusiness {
 
         const token = this.tokenManager.createToken(tokenPayLoad)
 
-
-
         const output: any = {
-            message: "User successful registered.",
+            message: "Successfully registered user.",
             token
         }
 
@@ -142,7 +142,7 @@ export class UserBusiness {
         const token: string = this.tokenManager.createToken(payload)
 
         const output: LoginOutputDTO = {
-            message: "Login realizado com sucesso",
+            message: "Logged in.",
             token
         }
 

@@ -47,13 +47,11 @@ export class PostsController {
     //
     public createPost = async (req: Request, res: Response) => {
         try {
-            const auth = req.headers.authorization
 
             const input = CreatePostSchema.parse({
                 content: req.body.content,
-                creator: auth
+                token: req.headers.authorization
             })
-
 
             const output = await this.postsBusiness.createPost(input)
 
@@ -105,6 +103,7 @@ export class PostsController {
                 token: req.headers.authorization,
                 postId: req.params.id
             })
+
 
             const output: DeletePostOutputDTO = await this.postsBusiness.deletePost(input)
 
