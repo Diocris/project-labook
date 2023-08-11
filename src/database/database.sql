@@ -37,6 +37,3 @@ CREATE TABLE likes_dislikes(
 );
 
 
-SELECT * FROM users;
-
-DELETE FROM users WHERE id = "3ca5eaa4-2e09-4413-9fb8-cf79abf3038d"
