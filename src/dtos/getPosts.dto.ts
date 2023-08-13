@@ -16,4 +16,10 @@ export interface GetPostOutputDTO {
     }
 }
 
-export const getPostsSchema = z.object({ auth: z.string({ required_error: "An Authorization is expected." }).min(1), id: z.string().min(1).optional() }).transform(data => data as GetPostsInputDTO)
+export const getPostsSchema = z.object({
+    auth: z.string({
+        required_error: "A JWT Token is expected on authorization headers.",
+        invalid_type_error: "Invalid Authorization token format."
+    }).min(1), id: z.string().min(1)
+})
+    .transform(data => data as GetPostsInputDTO)

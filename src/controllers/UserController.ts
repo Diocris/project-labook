@@ -97,29 +97,4 @@ export class UserController {
 
     }
 
-    //
-    //Delete User
-    //
-    public deleteID = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const input = DeleteSchema.parse({
-                email: req.params.email
-            })
-
-            const output = await this.userBusiness.deleteUser(input)
-
-            res.status(200).send(output)
-
-
-        } catch (error: any) {
-            if (error instanceof ZodError) {
-                res.status(400).send(error.issues)
-            }
-            if (error instanceof BaseError) {
-                res.status(error.statusCode).send(error.message)
-            } else {
-                res.send("Unexpected error.")
-            }
-        }
-    }
 }

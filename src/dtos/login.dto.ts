@@ -11,6 +11,6 @@ export interface LoginOutputDTO {
 }
 
 export const LoginSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(4)
+    email: z.string({ required_error: "An email is expected on body.", invalid_type_error: "Email format invalid." }).email(),
+    password: z.string({ required_error: "A password is expected on body.", invalid_type_error: "" }).min(4, "Try at leat 4 digits.")
 }).transform(data => data as LoginInputDTO)

@@ -15,4 +15,3 @@ const userController = new UserController(new UserBusiness(new UserDatabase(), n
 userRouter.get("/", userController.getUsers)
 userRouter.post("/signup", userController.createUser)
 userRouter.post("/login", userController.login)
-userRouter.delete("/:email", userController.deleteID)

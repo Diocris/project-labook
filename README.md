@@ -2,7 +2,7 @@
 
 ## About
 The Project Labook API is a comprehensive backend service designed for educational purposes to recreate the functionality of a social media platform. This API empowers users to interact with the backend of the Labook application, demonstrating a range of key technologies, concepts, and best practices in web development.
-
+### **[API Documentation](https://documenter.getpostman.com/view/27681104/2s9Xy5MAzc)**
 ## Tecnologies and Concepts
 
 * User Authentication and Authorization: The API provides robust user signup and login functionalities, employing secure JSON Web Tokens (JWT) for authentication. User roles are utilized to control access to specific endpoints, showcasing authorization principles.
@@ -40,11 +40,9 @@ The Project Labook API is a comprehensive backend service designed for education
  * Delete post
 </br>
 
-## API - Postman
-To use and test the api endpoints don't forget to see the documentation as well.
 </br>
 
-### **[API Documentation]()**
+
 
 
 </br>
@@ -115,7 +113,9 @@ JWT_SECRET=mysecretkey
 $ npm run start
 ```
 
-
+### Once is everything OK just have fun and feel free to try, edit or improve code as you like.
+### See you.
+### <em>Diocris Valentim.</em>
  
 
 

@@ -32,6 +32,6 @@ export const CreatorSchema = z.object({
 }).transform(data => data as CreatorInputDTO)
 
 export const CreatePostSchema = z.object({
-    content: z.string({ required_error: "Write something to be posted.", invalid_type_error: "Try to use some letter." }).min(1),
-    token: z.string({ required_error: "Creator id invalid." })
+    content: z.string({ required_error: "Content can't be empty.", invalid_type_error: "It expects a string." }).min(1),
+    token: z.string({ required_error: "A JWT Token is expected on authorization headers.", invalid_type_error: "Invalid Authorization token format." })
 }).transform(data => data as CreatePostInputDTO)
